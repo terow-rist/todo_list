@@ -4,6 +4,7 @@ import { AddTask, GetTasks, UpdateTask, DeleteTask } from "../wailsjs/go/main/Ap
 
 function App() {
     const [taskName, setTaskName] = useState("");
+    const [taskPriority, setTaskPriority] = useState(1); // Default priority
     const [tasks, setTasks] = useState({ todo: [], done: [] });
     const [selectedTask, setSelectedTask] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,68 +15,77 @@ function App() {
     }, []);
 
     const fetchTasks = () => {
-        GetTasks().then((data) => {
-            if (Array.isArray(data)) {
-                setTasks({
-                    todo: data.filter(task => !task.Completed),
-                    done: data.filter(task => task.Completed),
-                });
-                setSelectedTask(null); 
-            } else {
-                console.error("Invalid task data:", data);
-            }
-        }).catch(console.error);
+        GetTasks()
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setTasks({
+                        todo: data.filter(task => !task.Completed),
+                        done: data.filter(task => task.Completed),
+                    });
+                    setSelectedTask(null);
+                } else {
+                    console.error("Invalid task data:", data);
+                }
+            })
+            .catch(console.error);
     };
 
     const addNewTask = (e) => {
         e.preventDefault();
         if (taskName.trim()) {
-            AddTask(taskName).then(() => {
-                setTaskName(""); 
-                fetchTasks(); 
-            }).catch(console.error);
+            AddTask(taskName, taskPriority)
+                .then(() => {
+                    setTaskName(""); 
+                    setTaskPriority(1); // Reset priority
+                    fetchTasks();
+                })
+                .catch(console.error);
         }
     };
 
     const selectTask = (task) => {
         setSelectedTask(prev => (prev?.ID === task.ID ? null : task));
     };
-    
+
     const finishTask = () => {
         if (!selectedTask) return;
-    
-        UpdateTask(selectedTask.ID, true, selectedTask.Text).then(() => {
-            fetchTasks(); 
-        }).catch(console.error);
+
+        UpdateTask(selectedTask.ID, true, selectedTask.Text, selectedTask.Priority)
+            .then(fetchTasks)
+            .catch(console.error);
     };
 
     const openDeleteModal = (task) => {
-        setTaskToDelete(task); 
-        setIsModalOpen(true); 
+        setTaskToDelete(task);
+        setIsModalOpen(true);
     };
 
     const closeModal = () => {
         setIsModalOpen(false);
-        setTaskToDelete(null); 
+        setTaskToDelete(null);
     };
 
     const deleteTask = () => {
         if (!taskToDelete) return;
 
-        DeleteTask(taskToDelete.ID).then(() => {
-            fetchTasks(); 
-            closeModal(); 
-        }).catch(console.error);
+        DeleteTask(taskToDelete.ID)
+            .then(() => {
+                fetchTasks();
+                closeModal();
+            })
+            .catch(console.error);
     };
-    
+
     const updateTask = () => {
         if (!selectedTask) return;
-    
+
         const newTaskName = prompt("Enter new task name:", selectedTask.Text);
-        if (newTaskName && newTaskName.trim() !== selectedTask.Text) {
-            UpdateTask(selectedTask.ID, selectedTask.Completed, newTaskName).then(() => {
-                fetchTasks(); 
-            }).catch(console.error);
+        const newPriority = parseInt(prompt("Enter new priority (1-5):", selectedTask.Priority), 10);
+
+        if (newTaskName && newTaskName.trim() !== selectedTask.Text && !isNaN(newPriority)) {
+            UpdateTask(selectedTask.ID, selectedTask.Completed, newTaskName, newPriority)
+                .then(fetchTasks)
+                .catch(console.error);
         }
     };
 
@@ -93,6 +103,18 @@ function App() {
                     type="text"
                     placeholder="Enter a new task"
                 />
+                <select
+                    id="taskPriority"
+                    className="priority-select"
+                    value={taskPriority}
+                    onChange={(e) => setTaskPriority(parseInt(e.target.value, 10))}
+                >
+                    {[1, 2, 3, 4, 5].map((p) => (
+                        <option key={p} value={p}>
+                            Priority {p}
+                        </option>
+                    ))}
+                </select>
                 <button className="btn" onClick={addNewTask}>Add</button>
             </div>
 
@@ -105,10 +127,10 @@ function App() {
                         tasks.todo.map((task, index) => (
                             <div
                                 key={index}
-                                className={`task-box ${selectedTask?.Text === task.Text ? "selected" : ""}`}
+                                className={`task-box ${selectedTask?.ID === task.ID ? "selected" : ""}`}
                                 onClick={() => selectTask(task)}
                             >
-                                <p>{task.Text}</p>
+                                <p>{task.Text} (Priority {task.Priority})</p>
                             </div>
                         ))
                     )}
@@ -121,7 +143,7 @@ function App() {
                     ) : (
                         tasks.done.map((task, index) => (
                             <div key={index} className="task-box done">
-                                <p>{task.Text}</p>
+                                <p>{task.Text} (Priority {task.Priority})</p>
                             </div>
                         ))
                     )}
@@ -140,7 +162,6 @@ function App() {
                 </button>
             </div>
 
-            
             {isModalOpen && (
                 <div className="modal-overlay">
                     <div className="modal">

@@ -4,6 +4,7 @@ export namespace main {
 	    ID: number;
 	    Text: string;
 	    Completed: boolean;
+	    Priority: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Task(source);
@@ -14,6 +15,7 @@ export namespace main {
 	        this.ID = source["ID"];
 	        this.Text = source["Text"];
 	        this.Completed = source["Completed"];
+	        this.Priority = source["Priority"];
 	    }
 	}
 

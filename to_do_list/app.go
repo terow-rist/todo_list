@@ -19,8 +19,8 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-func (a *App) AddTask(text string) {
-	err := a.repository.AddTask(text)
+func (a *App) AddTask(text string, priority int) {
+	err := a.repository.AddTask(text, priority)
 	if err != nil {
 		runtime.LogError(a.ctx, "Failed to add task: "+err.Error())
 		return
@@ -37,8 +37,8 @@ func (a *App) GetTasks() []Task {
 	return tasks
 }
 
-func (a *App) UpdateTask(id int, completed bool, newText string) {
-	err := a.repository.UpdateTask(id, completed, newText)
+func (a *App) UpdateTask(id int, completed bool, newText string, priority int) {
+	err := a.repository.UpdateTask(id, priority, completed, newText)
 	if err != nil {
 		runtime.LogError(a.ctx, "Failed to update task: "+err.Error())
 		return

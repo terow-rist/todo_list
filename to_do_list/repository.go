@@ -11,12 +11,13 @@ type Task struct {
 	ID        int `gorm:"primaryKey"`
 	Text      string
 	Completed bool
+	Priority  int
 }
 
 type TaskRepository interface {
-	AddTask(text string) error
+	AddTask(text string, priority int) error
 	GetTasks() ([]Task, error)
-	UpdateTask(id int, completed bool, newText string) error
+	UpdateTask(id, priority int, completed bool, newText string) error
 	DeleteTask(id int) error
 }
 
@@ -34,8 +35,8 @@ func NewSQLiteRepository() *SQLiteRepository {
 	return &SQLiteRepository{db: db}
 }
 
-func (r *SQLiteRepository) AddTask(text string) error {
-	task := Task{Text: text, Completed: false}
+func (r *SQLiteRepository) AddTask(text string, priority int) error {
+	task := Task{Text: text, Completed: false, Priority: priority}
 	return r.db.Create(&task).Error
 }
 
@@ -45,8 +46,8 @@ func (r *SQLiteRepository) GetTasks() ([]Task, error) {
 	return tasks, err
 }
 
-func (r *SQLiteRepository) UpdateTask(id int, completed bool, newText string) error {
-	return r.db.Model(&Task{}).Where("id = ?", id).Updates(Task{Completed: completed, Text: newText}).Error
+func (r *SQLiteRepository) UpdateTask(id, priority int, completed bool, newText string) error {
+	return r.db.Model(&Task{}).Where("id = ?", id).Updates(Task{Completed: completed, Text: newText, Priority: priority}).Error
 }
 
 func (r *SQLiteRepository) DeleteTask(id int) error {
