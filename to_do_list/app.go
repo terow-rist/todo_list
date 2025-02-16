@@ -7,11 +7,12 @@ import (
 )
 
 type App struct {
-	ctx context.Context
+	ctx        context.Context
+	repository TaskRepository
 }
 
 func NewApp() *App {
-	return &App{}
+	return &App{repository: NewSQLiteRepository()}
 }
 
 func (a *App) startup(ctx context.Context) {
@@ -19,20 +20,37 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) AddTask(text string) {
-	AddTask(text)
+	err := a.repository.AddTask(text)
+	if err != nil {
+		runtime.LogError(a.ctx, "Failed to add task: "+err.Error())
+		return
+	}
 	runtime.LogInfo(a.ctx, "Task added: "+text)
 }
 
 func (a *App) GetTasks() []Task {
-	return GetTasks()
+	tasks, err := a.repository.GetTasks()
+	if err != nil {
+		runtime.LogError(a.ctx, "Failed to get tasks: "+err.Error())
+		return nil
+	}
+	return tasks
 }
 
 func (a *App) UpdateTask(id int, completed bool, newText string) {
-	UpdateTask(id, completed, newText)
+	err := a.repository.UpdateTask(id, completed, newText)
+	if err != nil {
+		runtime.LogError(a.ctx, "Failed to update task: "+err.Error())
+		return
+	}
 	runtime.LogInfo(a.ctx, "Task updated: "+newText)
 }
 
 func (a *App) DeleteTask(id int) {
-	DeleteTask(id)
+	err := a.repository.DeleteTask(id)
+	if err != nil {
+		runtime.LogError(a.ctx, "Failed to delete task: "+err.Error())
+		return
+	}
 	runtime.LogInfo(a.ctx, "Task deleted")
 }
