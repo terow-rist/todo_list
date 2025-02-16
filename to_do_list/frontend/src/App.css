@@ -1,0 +1,37 @@
+#taskSections {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.task-section {
+    width: 30%;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #222;
+    min-height: 200px;
+    text-align: center;
+}
+
+.task-section h2 {
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.task-box {
+    background: #3b3b3b;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: grab;
+    transition: transform 0.2s;
+}
+
+.task-box:active {
+    cursor: grabbing;
+    transform: scale(1.05);
+}
+
+.task-box:hover {
+    background: #505050;
+}
