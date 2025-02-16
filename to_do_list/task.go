@@ -2,22 +2,32 @@ package main
 
 import "fmt"
 
-// Define Task struct
 type Task struct {
+	ID        int
 	Text      string
 	Completed bool
 }
 
-var tasks []Task // A slice to hold tasks in memory (you can use a database later)
+var tasks []Task
+var taskCounter int
 
-// Function to add a new task
 func AddTask(text string) {
-	task := Task{Text: text, Completed: false}
+	taskCounter++
+	task := Task{ID: taskCounter, Text: text, Completed: false}
 	tasks = append(tasks, task)
 	fmt.Println("Added task:", text)
 }
 
-// Function to retrieve tasks
+func UpdateTask(id int, completed bool) {
+	for i, task := range tasks {
+		if task.ID == id {
+			tasks[i].Completed = completed
+			fmt.Println("Updated task:", task.Text)
+			return
+		}
+	}
+}
+
 func GetTasks() []Task {
 	return tasks
 }

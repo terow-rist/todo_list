@@ -6,31 +6,47 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-// App struct
 type App struct {
 	ctx   context.Context
-	tasks []string // Store tasks in a slice
+	tasks []Task
 }
 
-// NewApp creates a new App instance
 func NewApp() *App {
 	return &App{
-		tasks: []string{}, // Initialize an empty slice
+		tasks: []Task{},
 	}
 }
 
-// App startup (stores context for logging)
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// AddTask adds a new task to the list
 func (a *App) AddTask(text string) {
-	a.tasks = append(a.tasks, text) // Append new task
+	newTask := Task{Text: text, Completed: false}
+	a.tasks = append(a.tasks, newTask) // Append new task
 	runtime.LogInfo(a.ctx, "Task added: "+text)
 }
 
-// GetTasks returns all tasks as a slice
-func (a *App) GetTasks() []string {
+func (a *App) GetTasks() []Task {
 	return a.tasks
+}
+
+func (a *App) UpdateTask(text string, completed bool) {
+	for i, task := range a.tasks {
+		if task.Text == text {
+			a.tasks[i].Completed = completed
+			runtime.LogInfo(a.ctx, "Task updated: "+text)
+			return
+		}
+	}
+}
+
+func (a *App) DeleteTask(text string) {
+	for i, task := range a.tasks {
+		if task.Text == text {
+			a.tasks = append(a.tasks[:i], a.tasks[i+1:]...) // Remove task
+			runtime.LogInfo(a.ctx, "Task deleted: "+text)
+			return
+		}
+	}
 }
