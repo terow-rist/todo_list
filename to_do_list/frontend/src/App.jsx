@@ -6,6 +6,8 @@ function App() {
     const [taskName, setTaskName] = useState("");
     const [tasks, setTasks] = useState({ todo: [], done: [] });
     const [selectedTask, setSelectedTask] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [taskToDelete, setTaskToDelete] = useState(null);
 
     useEffect(() => {
         fetchTasks();
@@ -18,7 +20,7 @@ function App() {
                     todo: data.filter(task => !task.Completed),
                     done: data.filter(task => task.Completed),
                 });
-                setSelectedTask(null); // Reset selection
+                setSelectedTask(null); 
             } else {
                 console.error("Invalid task data:", data);
             }
@@ -46,18 +48,26 @@ function App() {
             fetchTasks(); 
         }).catch(console.error);
     };
-    
+
+    const openDeleteModal = (task) => {
+        setTaskToDelete(task); 
+        setIsModalOpen(true); 
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setTaskToDelete(null); 
+    };
 
     const deleteTask = () => {
-        if (!selectedTask) return;
-    
-        DeleteTask(selectedTask.ID).then(() => {
+        if (!taskToDelete) return;
+
+        DeleteTask(taskToDelete.ID).then(() => {
             fetchTasks(); 
+            closeModal(); 
         }).catch(console.error);
     };
     
-    
-
     const updateTask = () => {
         if (!selectedTask) return;
     
@@ -68,8 +78,6 @@ function App() {
             }).catch(console.error);
         }
     };
-    
-    
 
     return (
         <div id="app">
@@ -127,10 +135,24 @@ function App() {
                 <button className="btn update-btn" onClick={updateTask} disabled={!selectedTask}>
                     Edit Task
                 </button>
-                <button className="btn delete-btn" onClick={deleteTask} disabled={!selectedTask}>
+                <button className="btn delete-btn" onClick={() => openDeleteModal(selectedTask)} disabled={!selectedTask}>
                     Delete Task
                 </button>
             </div>
+
+            
+            {isModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h3>Confirm Deletion</h3>
+                        <p>Are you sure you want to delete the task "{taskToDelete?.Text}"?</p>
+                        <div className="modal-buttons">
+                            <button onClick={deleteTask}>Delete</button>
+                            <button onClick={closeModal}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
