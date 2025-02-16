@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-import { AddTask, GetTasks, UpdateTask } from "../wailsjs/go/main/App";
+import { AddTask, GetTasks, UpdateTask, DeleteTask } from "../wailsjs/go/main/App";
 
 function App() {
     const [taskName, setTaskName] = useState("");
@@ -12,45 +12,64 @@ function App() {
     }, []);
 
     const fetchTasks = () => {
-    GetTasks().then((data) => {
-        if (Array.isArray(data)) {
-            const todoTasks = data.filter(task => !task.Completed);
-            const doneTasks = data.filter(task => task.Completed);
-            
-            setTasks({ todo: todoTasks, done: doneTasks });
-
-            // Ensure selectedTask remains valid or gets reset
-            setSelectedTask(prev => 
-                prev && todoTasks.some(task => task.Text === prev.Text) ? prev : null
-            );
-        } else {
-            console.error("Invalid task data:", data);
-        }
-    }).catch(console.error);
-};
-
+        GetTasks().then((data) => {
+            if (Array.isArray(data)) {
+                setTasks({
+                    todo: data.filter(task => !task.Completed),
+                    done: data.filter(task => task.Completed),
+                });
+                setSelectedTask(null); // Reset selection
+            } else {
+                console.error("Invalid task data:", data);
+            }
+        }).catch(console.error);
+    };
 
     const addNewTask = (e) => {
         e.preventDefault();
         if (taskName.trim()) {
             AddTask(taskName).then(() => {
-                setTaskName(""); // Clear input
-                fetchTasks(); // Refresh tasks
+                setTaskName(""); 
+                fetchTasks(); 
             }).catch(console.error);
         }
     };
 
     const selectTask = (task) => {
-        setSelectedTask(prev => (prev?.Text === task.Text ? null : task));
+        setSelectedTask(prev => (prev?.ID === task.ID ? null : task));
     };
-
+    
     const finishTask = () => {
         if (!selectedTask) return;
-
-        UpdateTask(selectedTask.Text, true).then(() => {
-            fetchTasks(); // Refresh list
+    
+        UpdateTask(selectedTask.ID, true, selectedTask.Text).then(() => {
+            fetchTasks(); 
         }).catch(console.error);
     };
+    
+
+    const deleteTask = () => {
+        if (!selectedTask) return;
+    
+        DeleteTask(selectedTask.ID).then(() => {
+            fetchTasks(); 
+        }).catch(console.error);
+    };
+    
+    
+
+    const updateTask = () => {
+        if (!selectedTask) return;
+    
+        const newTaskName = prompt("Enter new task name:", selectedTask.Text);
+        if (newTaskName && newTaskName.trim() !== selectedTask.Text) {
+            UpdateTask(selectedTask.ID, selectedTask.Completed, newTaskName).then(() => {
+                fetchTasks(); 
+            }).catch(console.error);
+        }
+    };
+    
+    
 
     return (
         <div id="app">
@@ -101,9 +120,17 @@ function App() {
                 </div>
             </div>
 
-            <button className="btn finish-btn" onClick={finishTask} disabled={!selectedTask}>
-                Finish Task
-            </button>
+            <div className="button-group">
+                <button className="btn finish-btn" onClick={finishTask} disabled={!selectedTask}>
+                    Finish Task
+                </button>
+                <button className="btn update-btn" onClick={updateTask} disabled={!selectedTask}>
+                    Edit Task
+                </button>
+                <button className="btn delete-btn" onClick={deleteTask} disabled={!selectedTask}>
+                    Delete Task
+                </button>
+            </div>
         </div>
     );
 }

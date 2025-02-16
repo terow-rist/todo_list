@@ -20,6 +20,7 @@
 .task-box.done {
     background: #4caf50;
     color: white;
+    text-decoration: line-through; /* Add this line */
 }
 
 .btn.finish-btn {
@@ -42,4 +43,14 @@
 
 .btn.finish-btn:hover:not(:disabled) {
     background: #e64a19;
+}
+
+.delete-btn {
+    background-color: #ff4d4d;
+    color: white;
+    margin-left: 10px;
+}
+
+.delete-btn:disabled {
+    background-color: #ccc;
 }

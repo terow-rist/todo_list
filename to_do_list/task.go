@@ -18,10 +18,11 @@ func AddTask(text string) {
 	fmt.Println("Added task:", text)
 }
 
-func UpdateTask(id int, completed bool) {
+func UpdateTask(id int, completed bool, newText string) {
 	for i, task := range tasks {
 		if task.ID == id {
 			tasks[i].Completed = completed
+			tasks[i].Text = newText
 			fmt.Println("Updated task:", task.Text)
 			return
 		}
@@ -30,4 +31,14 @@ func UpdateTask(id int, completed bool) {
 
 func GetTasks() []Task {
 	return tasks
+}
+
+func DeleteTask(id int) {
+	for i, task := range tasks {
+		if task.ID == id {
+			tasks = append(tasks[:i], tasks[i+1:]...)
+			fmt.Println("Deleted task:", task.Text)
+			return
+		}
+	}
 }

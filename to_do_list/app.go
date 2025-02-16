@@ -7,14 +7,11 @@ import (
 )
 
 type App struct {
-	ctx   context.Context
-	tasks []Task
+	ctx context.Context
 }
 
 func NewApp() *App {
-	return &App{
-		tasks: []Task{},
-	}
+	return &App{}
 }
 
 func (a *App) startup(ctx context.Context) {
@@ -22,31 +19,20 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func (a *App) AddTask(text string) {
-	newTask := Task{Text: text, Completed: false}
-	a.tasks = append(a.tasks, newTask) // Append new task
+	AddTask(text)
 	runtime.LogInfo(a.ctx, "Task added: "+text)
 }
 
 func (a *App) GetTasks() []Task {
-	return a.tasks
+	return GetTasks()
 }
 
-func (a *App) UpdateTask(text string, completed bool) {
-	for i, task := range a.tasks {
-		if task.Text == text {
-			a.tasks[i].Completed = completed
-			runtime.LogInfo(a.ctx, "Task updated: "+text)
-			return
-		}
-	}
+func (a *App) UpdateTask(id int, completed bool, newText string) {
+	UpdateTask(id, completed, newText)
+	runtime.LogInfo(a.ctx, "Task updated: "+newText)
 }
 
-func (a *App) DeleteTask(text string) {
-	for i, task := range a.tasks {
-		if task.Text == text {
-			a.tasks = append(a.tasks[:i], a.tasks[i+1:]...) // Remove task
-			runtime.LogInfo(a.ctx, "Task deleted: "+text)
-			return
-		}
-	}
+func (a *App) DeleteTask(id int) {
+	DeleteTask(id)
+	runtime.LogInfo(a.ctx, "Task deleted")
 }

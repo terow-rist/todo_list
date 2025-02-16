@@ -14,6 +14,6 @@ export function GetTasks() {
   return window['go']['main']['App']['GetTasks']();
 }
 
-export function UpdateTask(arg1, arg2) {
-  return window['go']['main']['App']['UpdateTask'](arg1, arg2);
+export function UpdateTask(arg1, arg2, arg3) {
+  return window['go']['main']['App']['UpdateTask'](arg1, arg2, arg3);
 }
